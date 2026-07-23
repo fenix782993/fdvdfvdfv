@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Феникс Музыка — Полный каталог и Микс</title>
+  <title>Феникс Музыка — Панель Владельца</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -24,7 +24,7 @@
 
     /* Боковое меню */
     .sidebar {
-      width: 250px;
+      width: 260px;
       background: #161619;
       padding: 24px 16px;
       display: flex;
@@ -62,33 +62,54 @@
       font-weight: 700;
     }
 
-    /* Форма быстрого добавления песнен */
-    .add-form {
-      background: #202026;
-      padding: 12px;
-      border-radius: 10px;
+    /* Панель администратора / владельца */
+    .owner-section {
+      background: #1f1f26;
+      border: 1px solid #33333d;
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: auto;
+      gap: 10px;
     }
-    .add-form input {
+    .owner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffcc00;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .owner-section input {
       background: #121215;
       border: 1px solid #333;
-      padding: 8px;
+      padding: 8px 10px;
       border-radius: 6px;
       color: #fff;
       font-size: 12px;
       outline: none;
     }
-    .add-form button {
+    .owner-section input:focus { border-color: #ffcc00; }
+    .owner-btn {
       background: #ffcc00;
       border: none;
       padding: 8px;
       border-radius: 6px;
       font-weight: 700;
       cursor: pointer;
+      color: #000;
+      transition: background 0.2s;
     }
+    .owner-btn:hover { background: #e6b800; }
+    .status-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #333;
+      color: #aaa;
+    }
+    .status-badge.active { background: #22c55e; color: #fff; }
 
     /* Главный контент */
     .main-content {
@@ -155,8 +176,6 @@
     .track-row-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; }
     .track-row-title { font-weight: 600; font-size: 15px; }
     .track-row-artist { color: #888892; font-size: 13px; }
-    .like-icon { cursor: pointer; color: #555; font-size: 18px; }
-    .like-icon.active { color: #ff3366; }
 
     /* Плеер */
     .player-bar {
@@ -211,11 +230,22 @@
         <li class="nav-item" onclick="switchTab('home', this)">🎵 Вся база</li>
       </ul>
 
-      <div class="add-form">
-        <span style="font-size:12px; font-weight:bold; color:#aaa;">+ Добавить песню</span>
-        <input type="text" id="newTitle" placeholder="Название трека">
-        <input type="text" id="newArtist" placeholder="Исполнитель">
-        <button onclick="addNewSong()">Сохранить в базу</button>
+      <div class="owner-section" id="ownerSection">
+        <div class="owner-title">
+          <span>👑 Доступ Владельца</span>
+          <span class="status-badge" id="statusBadge">Гость</span>
+        </div>
+        
+        <div id="loginBox" style="display: flex; flex-direction: column; gap: 8px;">
+          <input type="password" id="ownerPassword" placeholder="Введите пароль">
+          <button class="owner-btn" onclick="loginOwner()">Войти</button>
+        </div>
+
+        <div id="addMusicBox" style="display: none; flex-direction: column; gap: 8px;">
+          <input type="text" id="newTitle" placeholder="Название трека">
+          <input type="text" id="newArtist" placeholder="Исполнитель">
+          <button class="owner-btn" onclick="addTrackAsOwner()">+ Добавить в базу</button>
+        </div>
       </div>
     </div>
 
@@ -225,7 +255,7 @@
         <div class="mix-banner">
           <div class="mix-info">
             <h1>🔥 Феникс Микс</h1>
-            <p>Умный поток: перемешиваем всю базу (Miyagi, АК-47, 4К, Ганвест, Лёня Полка, Тру и др.)</p>
+            <p>Умный поток всех песен из вашей базы данных.</p>
           </div>
           <button class="mix-play-btn" onclick="startMix()">Запустить Микс ▶</button>
         </div>
@@ -235,7 +265,7 @@
 
       <div id="tab-search" class="tab-content">
         <h2 class="section-title">Поиск по всей базе</h2>
-        <input type="text" class="search-input" id="searchInput" placeholder="Искать трек, артиста (например: 4К, Ганвест, Miyagi)..." oninput="handleSearch()">
+        <input type="text" class="search-input" id="searchInput" placeholder="Искать трек или артиста..." oninput="handleSearch()">
         <div class="track-list" id="searchTrackList"></div>
       </div>
 
@@ -274,15 +304,21 @@
     <audio id="audio"></audio>
   </div>
 
+  <script src="songs.js" onerror="console.log('Загружена дефолтная база')"></script>
+
   <script>
-    // Полноценная стартовая база артистов
-    let songs = [
-      { id: 1, title: "I Got Love", artist: "Miyagi & Эндшпиль", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", cover: "https://picsum.photos/300/300?random=1", liked: false },
-      { id: 2, title: "Minor", artist: "Miyagi", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", cover: "https://picsum.photos/300/300?random=2", liked: false },
-      { id: 3, title: "Темнота", artist: "Витя АК / 4К", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", cover: "https://picsum.photos/300/300?random=3", liked: false },
-      { id: 4, title: "Ананасовый сироп", artist: "Ганвест", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", cover: "https://picsum.photos/300/300?random=4", liked: false },
-      { id: 5, title: "Луч надежды", artist: "Лёня Полка / Тру", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", cover: "https://picsum.photos/300/300?random=5", liked: false }
-    ];
+    // Пароль владельца по умолчанию (можно изменить)
+    const OWNER_PASSWORD = "777";
+    let isOwnerLoggedIn = false;
+
+    // Базовый список, если songs.js еще не подключен
+    if (typeof songs === 'undefined') {
+      var songs = [
+        { id: 1, title: "I Got Love", artist: "Miyagi & Эндшпиль", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", cover: "https://picsum.photos/300/300?random=1" },
+        { id: 2, title: "Вика любит ПЭПЭ", artist: "Ганвест", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", cover: "https://picsum.photos/300/300?random=2" },
+        { id: 3, title: "Чёрное платье", artist: "DALEKONEANGEL", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", cover: "https://picsum.photos/300/300?random=3" }
+      ];
+    }
 
     let currentTrackIndex = 0;
     const audio = document.getElementById('audio');
@@ -291,6 +327,51 @@
     const playerTitle = document.getElementById('playerTitle');
     const playerArtist = document.getElementById('playerArtist');
     const progressFill = document.getElementById('progressFill');
+
+    // Функция авторизации Владельца
+    function loginOwner() {
+      const pass = document.getElementById('ownerPassword').value;
+      if (pass === OWNER_PASSWORD) {
+        isOwnerLoggedIn = true;
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('addMusicBox').style.display = 'flex';
+        const badge = document.getElementById('statusBadge');
+        badge.innerText = 'Владелец';
+        badge.classList.add('active');
+        alert('Успешный вход! Теперь вы можете добавлять треки.');
+      } else {
+        alert('Неверный пароль!');
+      }
+    }
+
+    // Функция добавления песни Владельцем
+    function addTrackAsOwner() {
+      if (!isOwnerLoggedIn) {
+        alert('Ошибка: Добавлять музыку может только Владелец!');
+        return;
+      }
+
+      const titleInput = document.getElementById('newTitle');
+      const artistInput = document.getElementById('newArtist');
+      const title = titleInput.value.trim();
+      const artist = artistInput.value.trim();
+
+      if (title && artist) {
+        songs.push({
+          id: Date.now(),
+          title: title,
+          artist: artist,
+          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`
+        });
+        titleInput.value = '';
+        artistInput.value = '';
+        renderAllLists();
+        alert(`Трек "${title}" успешно добавлен в базу!`);
+      } else {
+        alert('Заполните все поля!');
+      }
+    }
 
     function loadTrack(index) {
       if (!songs.length) return;
@@ -315,31 +396,10 @@
     }
 
     function startMix() {
-      // Алгоритм рандомизации для «Феникс Микса»
       songs.sort(() => Math.random() - 0.5);
       loadTrack(0);
       audio.play();
       playBtn.innerText = '❚❚';
-    }
-
-    function addNewSong() {
-      const titleInput = document.getElementById('newTitle');
-      const artistInput = document.getElementById('newArtist');
-      
-      if (titleInput.value.trim() && artistInput.value.trim()) {
-        songs.push({
-          id: Date.now(),
-          title: titleInput.value.trim(),
-          artist: artistInput.value.trim(),
-          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-          cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`,
-          liked: false
-        });
-        titleInput.value = '';
-        artistInput.value = '';
-        renderAllLists();
-        alert('Песня добавлена в общую базу и поиск!');
-      }
     }
 
     function handleSearch() {
