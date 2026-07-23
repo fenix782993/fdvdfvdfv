@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Феникс Музыка</title>
+  
+  <meta name="theme-color" content="#ffcc00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -53,7 +58,18 @@
       opacity: 0.5;
     }
 
-    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .install-pwa-btn {
+      background: #ffcc00;
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 18px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: none;
+    }
     .profile-btn {
       width: 36px;
       height: 36px;
@@ -280,6 +296,7 @@
       </div>
     </div>
     <div class="header-right">
+      <button class="install-pwa-btn" id="installBtn" onclick="installPWA()">📲 Установить</button>
       <div class="profile-btn" id="profileBtn" onclick="openAdminModal()" title="Профиль">👤</div>
     </div>
   </div>
@@ -298,7 +315,7 @@
     <div class="main-content">
       <div class="admin-panel-inline" id="adminPanel">
         <div style="font-weight:700; color:#ffcc00; font-size:13px; display:flex; justify-content:space-between;">
-          <span>👑 Панель Владельца (Админка)</span>
+          <span>👑 Панель Владельца (Пароль Fenix12)</span>
         </div>
         <div style="display:flex; gap:8px;">
           <button style="background:#ffcc00; border:none; padding:8px 12px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="document.getElementById('fileInputFiles').click()">🎵 Выбрать 500+ MP3</button>
@@ -406,7 +423,7 @@
     const progressFill = document.getElementById('progressFill');
     const lyricsText = document.getElementById('lyricsText');
 
-    // === Блок постоянного сохранения в память браузера (IndexedDB) ===
+    // === IndexedDB Хранилище (Песни сохраняются навсегда) ===
     let db;
     const dbReq = indexedDB.open("FenixMusicDB", 1);
     dbReq.onupgradeneeded = (e) => {
@@ -446,7 +463,6 @@
         const stored = req.result;
         if (stored && stored.length > 0) {
           songs = stored.map(s => {
-            // Восстанавливаем объект из файла/блоба
             const blob = new Blob([s.fileData], { type: s.fileType });
             return {
               ...s,
@@ -458,8 +474,8 @@
         }
       };
     }
-    // =================================================================
 
+    // === Управление Владельца ===
     function openAdminModal() {
       if (isOwnerLoggedIn) {
         alert("Вы уже вошли как Владелец!");
@@ -516,7 +532,7 @@
 
       renderAllLists();
       if (currentTrackIndex === -1 && songs.length > 0) loadTrack(0);
-      alert(`Успешно добавлено и сохранено ${audioFiles.length} треков!`);
+      alert(`Успешно сохранено ${audioFiles.length} треков!`);
     }
 
     function clearAllTracks() {
@@ -726,6 +742,42 @@
       const sec = Math.floor(s % 60);
       return `${m}:${sec < 10 ? '0' : ''}${sec}`;
     }
+
+    // === Автоматическая настройка PWA приложения ===
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBtn').style.display = 'block';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('installBtn').style.display = 'none';
+        });
+      }
+    }
+
+    // Динамическая регистрация манифеста и сэрвис-воркера
+    const manifest = {
+      name: "Феникс Музыка",
+      short_name: "Феникс",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#121214",
+      theme_color: "#ffcc00",
+      icons: [{ src: "https://picsum.photos/192/192", sizes: "192x192", type: "image/png" }]
+    };
+    const stringManifest = JSON.stringify(manifest);
+    const blobManifest = new Blob([stringManifest], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(blobManifest);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = manifestURL;
+    document.head.appendChild(link);
 
     renderAllLists();
   </script>
