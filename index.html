@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Феникс Музыка — Рабочая версия</title>
+  <title>Феникс Музыка — Полный плеер</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -19,13 +19,13 @@
     .app-container {
       display: flex;
       flex: 1;
-      height: calc(100vh - 90px);
+      height: calc(100vh - 180px);
     }
 
     .sidebar {
       width: 260px;
       background: #161619;
-      padding: 24px 16px;
+      padding: 20px 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -35,7 +35,6 @@
       font-size: 22px;
       font-weight: 800;
       color: #ffcc00;
-      margin-bottom: 8px;
     }
     .nav-list {
       list-style: none;
@@ -44,7 +43,7 @@
       gap: 8px;
     }
     .nav-item {
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 10px;
       cursor: pointer;
       color: #a0a0a8;
@@ -65,15 +64,15 @@
     .owner-section {
       background: #1f1f26;
       border: 1px solid #33333d;
-      padding: 14px;
+      padding: 12px;
       border-radius: 12px;
       margin-top: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .owner-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: #ffcc00;
       display: flex;
@@ -83,7 +82,7 @@
     .owner-section input {
       background: #121215;
       border: 1px solid #333;
-      padding: 8px 10px;
+      padding: 8px;
       border-radius: 6px;
       color: #fff;
       font-size: 12px;
@@ -109,34 +108,12 @@
 
     .main-content {
       flex: 1;
-      padding: 32px;
+      padding: 24px;
       overflow-y: auto;
       background: linear-gradient(180deg, #18181c 0%, #0f0f11 100%);
     }
 
-    .section-title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
-
-    .mix-banner {
-      background: linear-gradient(135deg, #241c03 0%, #421c00 100%);
-      border: 1px solid #ffcc0044;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .mix-info h1 { font-size: 28px; color: #ffcc00; margin-bottom: 6px; }
-    .mix-info p { color: #ccc; font-size: 14px; }
-    .mix-play-btn {
-      background: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 30px;
-      font-weight: 800;
-      cursor: pointer;
-    }
+    .section-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
 
     .search-input {
       width: 100%;
@@ -163,11 +140,21 @@
     }
     .track-row:hover, .track-row.active { background: #25252c; }
     .track-row.active .track-row-title { color: #ffcc00; }
-    .track-row-left { display: flex; align-items: center; gap: 16px; }
-    .track-row-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; }
-    .track-row-title { font-weight: 600; font-size: 15px; }
-    .track-row-artist { color: #888892; font-size: 13px; }
+    .track-row-left { display: flex; align-items: center; gap: 14px; }
+    .track-row-img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+    .track-row-title { font-weight: 600; font-size: 14px; }
+    .track-row-artist { color: #888892; font-size: 12px; }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ff4444;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 8px;
+      display: none;
+    }
 
+    /* Плеер */
     .player-bar {
       height: 90px;
       background: #161619;
@@ -175,25 +162,25 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
+      padding: 0 24px;
     }
-    .now-playing { display: flex; align-items: center; gap: 16px; width: 280px; }
-    .now-playing-cover { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; }
+    .now-playing { display: flex; align-items: center; gap: 14px; width: 260px; }
+    .now-playing-cover { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: #222; }
     
     .player-controls-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      width: 45%;
+      width: 40%;
     }
-    .btn-group { display: flex; align-items: center; gap: 20px; }
-    .control-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+    .btn-group { display: flex; align-items: center; gap: 16px; }
+    .control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
     .play-main-btn {
       background: #ffcc00;
       color: #000;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -201,9 +188,40 @@
       font-weight: bold;
     }
 
-    .progress-wrapper { display: flex; align-items: center; gap: 12px; width: 100%; font-size: 12px; color: #777; }
+    .progress-wrapper { display: flex; align-items: center; gap: 10px; width: 100%; font-size: 12px; color: #777; }
     .progress-bar-bg { flex: 1; height: 4px; background: #333; border-radius: 2px; cursor: pointer; position: relative; }
     .progress-bar-fill { height: 100%; background: #ffcc00; border-radius: 2px; width: 0%; }
+
+    /* Громкость */
+    .volume-container { display: flex; align-items: center; gap: 8px; width: 160px; }
+    .volume-slider { width: 100px; accent-color: #ffcc00; cursor: pointer; }
+
+    /* Блок Текста Песни (Lyrics) */
+    .lyrics-bar {
+      height: 90px;
+      background: #111114;
+      border-top: 1px solid #1a1a1f;
+      padding: 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .lyrics-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffcc00;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .lyrics-content {
+      font-size: 13px;
+      color: #ccc;
+      white-space: pre-line;
+      line-height: 1.4;
+    }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -227,29 +245,21 @@
           <span class="status-badge" id="statusBadge">Гость</span>
         </div>
         
-        <div id="loginBox" style="display: flex; flex-direction: column; gap: 8px;">
+        <div id="loginBox" style="display: flex; flex-direction: column; gap: 6px;">
           <input type="password" id="ownerPassword" placeholder="Пароль (777)">
           <button class="owner-btn" onclick="loginOwner()">Войти</button>
         </div>
 
-        <div id="addMusicBox" style="display: none; flex-direction: column; gap: 8px;">
-          <button class="owner-btn" onclick="document.getElementById('fileInput').click()">📁 Загрузить MP3 с ПК</button>
+        <div id="addMusicBox" style="display: none; flex-direction: column; gap: 6px;">
+          <button class="owner-btn" onclick="document.getElementById('fileInput').click()">📁 Загрузить MP3</button>
           <input type="file" id="fileInput" accept="audio/*" multiple onchange="handleFileUpload(this.files)">
         </div>
       </div>
     </div>
 
     <div class="main-content">
-      
       <div id="tab-mix" class="tab-content active">
-        <div class="mix-banner">
-          <div class="mix-info">
-            <h1>🔥 Феникс Микс</h1>
-            <p>Нажми кнопку справа, чтобы начать прослушивание</p>
-          </div>
-          <button class="mix-play-btn" onclick="startMix()">Запустить Микс ▶</button>
-        </div>
-        <h2 class="section-title">Список воспроизведения</h2>
+        <h2 class="section-title">🔥 Феникс Микс</h2>
         <div class="track-list" id="mixTrackList"></div>
       </div>
 
@@ -263,16 +273,15 @@
         <h2 class="section-title">Каталог треков</h2>
         <div class="track-list" id="homeTrackList"></div>
       </div>
-
     </div>
   </div>
 
   <div class="player-bar">
     <div class="now-playing">
-      <img src="https://picsum.photos/300/300?random=1" id="playerCover" class="now-playing-cover">
+      <img src="https://picsum.photos/300/300?random=0" id="playerCover" class="now-playing-cover">
       <div>
-        <div id="playerTitle" style="font-weight:700;">Нажмите ▶ для старта</div>
-        <div id="playerArtist" style="color:#888; font-size:13px;">—</div>
+        <div id="playerTitle" style="font-weight:700;">Загрузите треки</div>
+        <div id="playerArtist" style="color:#888; font-size:12px;">—</div>
       </div>
     </div>
 
@@ -291,27 +300,39 @@
       </div>
     </div>
 
-    <audio id="audio" crossorigin="anonymous"></audio>
+    <div class="volume-container">
+      <button class="control-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1" oninput="changeVolume(this.value)">
+    </div>
+
+    <audio id="audio"></audio>
+  </div>
+
+  <div class="lyrics-bar">
+    <div class="lyrics-header">
+      <span>📜 Текст песни</span>
+      <span id="editLyricsBtn" style="cursor:pointer; display:none;" onclick="editLyrics()">✏️ Редактировать</span>
+    </div>
+    <div class="lyrics-content" id="lyricsContent">Текст песни пока не добавлен.</div>
   </div>
 
   <script>
     const OWNER_PASSWORD = "777";
     let isOwnerLoggedIn = false;
 
-    // Гарантированно рабочие аудиопотоки
-    let songs = [
-      { id: 1, title: "I Got Love", artist: "Miyagi & Эндшпиль", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=1" },
-      { id: 2, title: "Вика любит ПЭПЭ", artist: "Ганвест", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=2" },
-      { id: 3, title: "Чёрное платье", artist: "DALEKONEANGEL", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=3" }
-    ];
+    // Очищенный пустой массив
+    let songs = [];
 
-    let currentTrackIndex = 0;
+    let currentTrackIndex = -1;
+    let lastVolume = 1;
+
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const playerCover = document.getElementById('playerCover');
     const playerTitle = document.getElementById('playerTitle');
     const playerArtist = document.getElementById('playerArtist');
     const progressFill = document.getElementById('progressFill');
+    const lyricsContent = document.getElementById('lyricsContent');
 
     function loginOwner() {
       const pass = document.getElementById('ownerPassword').value;
@@ -319,10 +340,12 @@
         isOwnerLoggedIn = true;
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('addMusicBox').style.display = 'flex';
+        document.getElementById('editLyricsBtn').style.display = 'inline';
         const badge = document.getElementById('statusBadge');
         badge.innerText = 'Владелец';
         badge.classList.add('active');
-        alert('Доступ открыт! Теперь ты можешь загружать свои MP3-файлы.');
+        renderAllLists();
+        alert('Вход выполнен! Теперь доступна загрузка и удаление треков.');
       } else {
         alert('Неверный пароль!');
       }
@@ -331,50 +354,98 @@
     function handleFileUpload(files) {
       Array.from(files).forEach(file => {
         if (file.type.startsWith('audio/')) {
-          songs.unshift({
+          songs.push({
             id: Date.now() + Math.random(),
             title: file.name.replace(/\.[^/.]+$/, ""),
-            artist: "Мой трек",
+            artist: "Загруженный артист",
             src: URL.createObjectURL(file),
-            cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`
+            cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`,
+            lyrics: "Текст песни отсутствует. Владелец может добавить его кнопкой «Редактировать»."
           });
         }
       });
       renderAllLists();
-      loadTrack(0);
-      togglePlay();
+      if (currentTrackIndex === -1 && songs.length > 0) {
+        loadTrack(0);
+      }
+    }
+
+    function deleteTrack(index, e) {
+      e.stopPropagation();
+      if (!isOwnerLoggedIn) return;
+      songs.splice(index, 1);
+      if (currentTrackIndex >= songs.length) currentTrackIndex = songs.length - 1;
+      if (songs.length === 0) {
+        audio.pause();
+        currentTrackIndex = -1;
+        playerTitle.innerText = "Загрузите треки";
+        playerArtist.innerText = "—";
+        lyricsContent.innerText = "Текст песни пока не добавлен.";
+      } else {
+        loadTrack(currentTrackIndex >= 0 ? currentTrackIndex : 0);
+      }
+      renderAllLists();
     }
 
     function loadTrack(index) {
-      if (!songs.length) return;
+      if (index < 0 || index >= songs.length) return;
       currentTrackIndex = index;
       const track = songs[index];
       playerTitle.innerText = track.title;
       playerArtist.innerText = track.artist;
       playerCover.src = track.cover;
+      lyricsContent.innerText = track.lyrics || "Текст песни отсутствует.";
       audio.src = track.src;
+
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title,
+          artist: track.artist,
+          artwork: [{ src: track.cover, sizes: '300x300', type: 'image/jpeg' }]
+        });
+      }
+
       renderAllLists();
     }
 
     function togglePlay() {
-      if (!audio.src && songs.length) loadTrack(0);
-      
+      if (songs.length === 0) return;
+      if (currentTrackIndex === -1) loadTrack(0);
+
       if (audio.paused) {
-        audio.play().then(() => {
-          playBtn.innerText = '❚❚';
-        }).catch(err => {
-          console.log("Кликните по странице для запуска");
-        });
+        audio.play();
+        playBtn.innerText = '❚❚';
       } else {
         audio.pause();
         playBtn.innerText = '▶';
       }
     }
 
-    function startMix() {
-      songs.sort(() => Math.random() - 0.5);
-      loadTrack(0);
-      togglePlay();
+    function changeVolume(val) {
+      audio.volume = val;
+      document.getElementById('muteBtn').innerText = val == 0 ? '🔇' : '🔊';
+    }
+
+    function toggleMute() {
+      if (audio.volume > 0) {
+        lastVolume = audio.volume;
+        audio.volume = 0;
+        document.getElementById('volumeSlider').value = 0;
+        document.getElementById('muteBtn').innerText = '🔇';
+      } else {
+        audio.volume = lastVolume;
+        document.getElementById('volumeSlider').value = lastVolume;
+        document.getElementById('muteBtn').innerText = '🔊';
+      }
+    }
+
+    function editLyrics() {
+      if (!isOwnerLoggedIn || currentTrackIndex === -1) return;
+      const newLyrics = prompt("Введите текст песни:", songs[currentTrackIndex].lyrics);
+      if (newLyrics !== null) {
+        songs[currentTrackIndex].lyrics = newLyrics;
+        lyricsContent.innerText = newLyrics;
+      }
     }
 
     function handleSearch() {
@@ -382,19 +453,21 @@
       const found = songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
       document.getElementById('searchTrackList').innerHTML = found.length 
         ? found.map(s => renderTrackRow(s, songs.indexOf(s))).join('')
-        : '<p style="color:#777;">Ничего не найдено</p>';
+        : '<p style="color:#777;">Треки не найдены</p>';
     }
 
     function nextTrack() {
       if (!songs.length) return;
       loadTrack((currentTrackIndex + 1) % songs.length);
-      togglePlay();
+      audio.play();
+      playBtn.innerText = '❚❚';
     }
 
     function prevTrack() {
       if (!songs.length) return;
       loadTrack((currentTrackIndex - 1 + songs.length) % songs.length);
-      togglePlay();
+      audio.play();
+      playBtn.innerText = '❚❚';
     }
 
     function renderTrackRow(song, index) {
@@ -408,18 +481,21 @@
               <div class="track-row-artist">${song.artist}</div>
             </div>
           </div>
+          ${isOwnerLoggedIn ? `<button class="delete-btn" style="display:block;" onclick="deleteTrack(${index}, event)">🗑️</button>` : ''}
         </div>
       `;
     }
 
     function selectAndPlay(index) {
       loadTrack(index);
-      togglePlay();
+      audio.play();
+      playBtn.innerText = '❚❚';
     }
 
     function renderAllLists() {
-      document.getElementById('mixTrackList').innerHTML = songs.map((s, i) => renderTrackRow(s, i)).join('');
-      document.getElementById('homeTrackList').innerHTML = songs.map((s, i) => renderTrackRow(s, i)).join('');
+      const emptyMsg = '<p style="color:#777; font-size:14px;">Список пуст. Войдите под паролем 777 и нажмите «Загрузить MP3».</p>';
+      document.getElementById('mixTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
+      document.getElementById('homeTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
       handleSearch();
     }
 
@@ -429,6 +505,16 @@
       document.getElementById(`tab-${tabName}`).classList.add('active');
       el.classList.add('active');
     }
+
+    // Горячие клавиши
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+      if (e.code === 'ArrowRight') { audio.currentTime += 5; }
+      if (e.code === 'ArrowLeft') { audio.currentTime -= 5; }
+      if (e.code === 'ArrowUp') { changeVolume(Math.min(1, audio.volume + 0.1)); document.getElementById('volumeSlider').value = audio.volume; }
+      if (e.code === 'ArrowDown') { changeVolume(Math.max(0, audio.volume - 0.1)); document.getElementById('volumeSlider').value = audio.volume; }
+    });
 
     audio.addEventListener('timeupdate', () => {
       if (audio.duration) {
@@ -440,8 +526,7 @@
 
     function setProgress(e) {
       const rect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      audio.currentTime = (clickX / rect.width) * audio.duration;
+      audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
     }
 
     function formatTime(s) {
@@ -452,7 +537,7 @@
     }
 
     audio.addEventListener('ended', nextTrack);
-    loadTrack(0);
+    renderAllLists();
   </script>
 </body>
 </html>
