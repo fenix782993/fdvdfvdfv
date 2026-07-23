@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Феникс Музыка — Полный плеер</title>
+  <title>Феникс Музыка — Массовая загрузка 500+</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -23,7 +23,7 @@
     }
 
     .sidebar {
-      width: 260px;
+      width: 280px;
       background: #161619;
       padding: 20px 16px;
       display: flex;
@@ -96,6 +96,7 @@
       font-weight: 700;
       cursor: pointer;
       color: #000;
+      font-size: 12px;
     }
     .status-badge {
       font-size: 10px;
@@ -105,6 +106,32 @@
       color: #aaa;
     }
     .status-badge.active { background: #22c55e; color: #fff; }
+
+    /* Индикатор массовой загрузки */
+    .upload-progress-box {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .upload-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #111;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .upload-progress-fill {
+      height: 100%;
+      background: #22c55e;
+      width: 0%;
+      transition: width 0.1s;
+    }
+    .upload-status-text {
+      font-size: 10px;
+      color: #aaa;
+      text-align: center;
+    }
 
     .main-content {
       flex: 1;
@@ -192,11 +219,10 @@
     .progress-bar-bg { flex: 1; height: 4px; background: #333; border-radius: 2px; cursor: pointer; position: relative; }
     .progress-bar-fill { height: 100%; background: #ffcc00; border-radius: 2px; width: 0%; }
 
-    /* Громкость */
     .volume-container { display: flex; align-items: center; gap: 8px; width: 160px; }
     .volume-slider { width: 100px; accent-color: #ffcc00; cursor: pointer; }
 
-    /* Блок Текста Песни (Lyrics) */
+    /* Блок Текста Песни */
     .lyrics-bar {
       height: 90px;
       background: #111114;
@@ -225,7 +251,7 @@
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    #fileInput { display: none; }
+    #fileInputFiles, #fileInputFolder { display: none; }
   </style>
 </head>
 <body>
@@ -236,7 +262,7 @@
       <ul class="nav-list">
         <li class="nav-item mix-tab active" onclick="switchTab('mix', this)">✨ Феникс Микс</li>
         <li class="nav-item" onclick="switchTab('search', this)">🔍 Поиск</li>
-        <li class="nav-item" onclick="switchTab('home', this)">🎵 Вся база</li>
+        <li class="nav-item" onclick="switchTab('home', this)">🎵 Вся база (<span id="totalTrackCount">0</span>)</li>
       </ul>
 
       <div class="owner-section">
@@ -251,8 +277,20 @@
         </div>
 
         <div id="addMusicBox" style="display: none; flex-direction: column; gap: 6px;">
-          <button class="owner-btn" onclick="document.getElementById('fileInput').click()">📁 Загрузить MP3</button>
-          <input type="file" id="fileInput" accept="audio/*" multiple onchange="handleFileUpload(this.files)">
+          <button class="owner-btn" onclick="document.getElementById('fileInputFiles').click()">🎵 Выбрать 500+ MP3</button>
+          <button class="owner-btn" style="background:#e6b800;" onclick="document.getElementById('fileInputFolder').click()">📁 Загрузить ПАПКУ</button>
+          
+          <input type="file" id="fileInputFiles" accept="audio/*" multiple onchange="handleFileUpload(this.files)">
+          <input type="file" id="fileInputFolder" accept="audio/*" webkitdirectory directory multiple onchange="handleFileUpload(this.files)">
+          
+          <button class="owner-btn" style="background:#ff4444; color:#fff;" onclick="clearAllTracks()">🗑️ Очистить всю базу</button>
+
+          <div class="upload-progress-box" id="uploadProgressBox">
+            <div class="upload-progress-bar">
+              <div class="upload-progress-fill" id="uploadProgressFill"></div>
+            </div>
+            <div class="upload-status-text" id="uploadStatusText">Загрузка 0 / 0...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -320,9 +358,7 @@
     const OWNER_PASSWORD = "777";
     let isOwnerLoggedIn = false;
 
-    // Очищенный пустой массив
     let songs = [];
-
     let currentTrackIndex = -1;
     let lastVolume = 1;
 
@@ -345,28 +381,81 @@
         badge.innerText = 'Владелец';
         badge.classList.add('active');
         renderAllLists();
-        alert('Вход выполнен! Теперь доступна загрузка и удаление треков.');
+        alert('Успешный вход! Доступна массовая загрузка.');
       } else {
         alert('Неверный пароль!');
       }
     }
 
-    function handleFileUpload(files) {
-      Array.from(files).forEach(file => {
-        if (file.type.startsWith('audio/')) {
+    // Асинхронная обработка большого количества файлов (500+)
+    async function handleFileUpload(files) {
+      if (!files || files.length === 0) return;
+
+      const audioFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || f.name.endsWith('.mp3') || f.name.endsWith('.wav') || f.name.endsWith('.flac'));
+      
+      if (audioFiles.length === 0) {
+        alert('В выбранных файлах не найдено аудиозаписей!');
+        return;
+      }
+
+      const progressBox = document.getElementById('uploadProgressBox');
+      const progressFill = document.getElementById('uploadProgressFill');
+      const statusText = document.getElementById('uploadStatusText');
+
+      progressBox.style.display = 'flex';
+
+      const chunkSize = 50; // Добавляем порциями по 50 файлов, чтобы страница не зависала
+      const total = audioFiles.length;
+
+      for (let i = 0; i < total; i += chunkSize) {
+        const chunk = audioFiles.slice(i, i + chunkSize);
+
+        chunk.forEach(file => {
+          // Автоматическое разбиение имени "Артист - Трек.mp3"
+          let nameParts = file.name.replace(/\.[^/.]+$/, "").split(" - ");
+          let artistName = nameParts.length > 1 ? nameParts[0].trim() : "Неизвестный артист";
+          let trackName = nameParts.length > 1 ? nameParts.slice(1).join(" - ").trim() : nameParts[0].trim();
+
           songs.push({
             id: Date.now() + Math.random(),
-            title: file.name.replace(/\.[^/.]+$/, ""),
-            artist: "Загруженный артист",
+            title: trackName,
+            artist: artistName,
             src: URL.createObjectURL(file),
             cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`,
-            lyrics: "Текст песни отсутствует. Владелец может добавить его кнопкой «Редактировать»."
+            lyrics: "Текст песни отсутствует."
           });
-        }
-      });
+        });
+
+        // Обновляем прогресс
+        let loadedCount = Math.min(i + chunkSize, total);
+        let percent = Math.round((loadedCount / total) * 100);
+        progressFill.style.width = percent + '%';
+        statusText.innerText = `Обработка: ${loadedCount} / ${total} (${percent}%)`;
+
+        // Даем браузеру перевести дыхание
+        await new Promise(r => setTimeout(r, 10));
+      }
+
+      progressBox.style.display = 'none';
       renderAllLists();
+
       if (currentTrackIndex === -1 && songs.length > 0) {
         loadTrack(0);
+      }
+
+      alert(`Успешно добавлено ${total} треков!`);
+    }
+
+    function clearAllTracks() {
+      if (!isOwnerLoggedIn) return;
+      if (confirm("Вы уверены, что хотите удалить все треки из списка?")) {
+        songs = [];
+        audio.pause();
+        currentTrackIndex = -1;
+        playerTitle.innerText = "Загрузите треки";
+        playerArtist.innerText = "—";
+        lyricsContent.innerText = "Текст песни пока не добавлен.";
+        renderAllLists();
       }
     }
 
@@ -493,7 +582,8 @@
     }
 
     function renderAllLists() {
-      const emptyMsg = '<p style="color:#777; font-size:14px;">Список пуст. Войдите под паролем 777 и нажмите «Загрузить MP3».</p>';
+      document.getElementById('totalTrackCount').innerText = songs.length;
+      const emptyMsg = '<p style="color:#777; font-size:14px;">Список пуст. Зайдите с паролем 777 и загрузите файлы или всю папку.</p>';
       document.getElementById('mixTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
       document.getElementById('homeTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
       handleSearch();
