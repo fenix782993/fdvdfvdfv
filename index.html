@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Феникс Музыка — В стиле Яндекс Музыки</title>
+  <title>Феникс Музыка</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -17,7 +17,6 @@
       user-select: none;
     }
 
-    /* Верхняя шапка */
     .top-header {
       height: 60px;
       background: #18181c;
@@ -55,7 +54,6 @@
     }
 
     .header-right { display: flex; align-items: center; gap: 16px; }
-    /* Секретная кнопка входа в профиль */
     .profile-btn {
       width: 36px;
       height: 36px;
@@ -72,10 +70,8 @@
     .profile-btn:hover { border-color: #ffcc00; background: #2f2f3a; }
     .profile-btn.active { border-color: #22c55e; background: #1f2d24; }
 
-    /* Основная сетка */
     .app-body { display: flex; flex: 1; height: calc(100vh - 150px); }
 
-    /* Левая навигация (Яндекс стиль) */
     .sidebar {
       width: 240px;
       background: #18181c;
@@ -101,7 +97,6 @@
     .nav-item:hover { background: #22222a; color: #fff; }
     .nav-item.active { background: #ffcc00; color: #000; font-weight: 700; }
 
-    /* Контентная область */
     .main-content {
       flex: 1;
       padding: 24px 32px;
@@ -109,7 +104,6 @@
       background: linear-gradient(180deg, #16161a 0%, #121214 100%);
     }
 
-    /* Моя Волна (Большой баннер в стиле Яндекса) */
     .wave-banner {
       background: linear-gradient(135deg, #ffcc00 0%, #ff4500 100%);
       border-radius: 20px;
@@ -141,7 +135,6 @@
 
     .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Список треков */
     .track-list { display: flex; flex-direction: column; gap: 4px; }
     .track-row {
       display: flex;
@@ -164,7 +157,6 @@
     .like-btn.active { color: #ff3355; }
     .delete-btn { background: none; border: none; color: #ff4444; cursor: pointer; font-size: 14px; display: none; }
 
-    /* Нижний Плеер (Яндекс Музыка) */
     .player-bar {
       height: 90px;
       background: #18181c;
@@ -208,7 +200,6 @@
     .player-right { display: flex; align-items: center; gap: 12px; width: 200px; justify-content: flex-end; }
     .volume-slider { width: 90px; accent-color: #ffcc00; cursor: pointer; }
 
-    /* Полоса текста песни */
     .lyrics-drawer {
       height: 60px;
       background: #101012;
@@ -222,7 +213,6 @@
     }
     .lyrics-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; font-weight: 500; }
 
-    /* Всплывающее окно секретной админки */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -298,7 +288,7 @@
     <div class="sidebar">
       <div class="nav-group-title">Музыка</div>
       <div class="nav-item active" onclick="switchTab('wave', this)">✨ Моя волна</div>
-      <div class="nav-item" onclick="switchTab('home', this)">🎵 Вся база (<span id="totalCount">0</span>)</div>
+      <div class="nav-item" onclick="switchTab('home', this)">🎵 Музыка (<span id="totalCount">0</span>)</div>
       <div class="nav-item" onclick="switchTab('search', this)">🔍 Поиск</div>
 
       <div class="nav-group-title">Моя коллекция</div>
@@ -306,9 +296,8 @@
     </div>
 
     <div class="main-content">
-
       <div class="admin-panel-inline" id="adminPanel">
-        <div style="font-weight:700; color:#ffcc00; font-size:13px; display:flex; justify-shadow:space-between;">
+        <div style="font-weight:700; color:#ffcc00; font-size:13px; display:flex; justify-content:space-between;">
           <span>👑 Панель Владельца (Админка)</span>
         </div>
         <div style="display:flex; gap:8px;">
@@ -333,7 +322,7 @@
       </div>
 
       <div id="tab-home" class="tab-content">
-        <div class="section-title">Все треки</div>
+        <div class="section-title">Музыка</div>
         <div class="track-list" id="homeTrackList"></div>
       </div>
 
@@ -346,7 +335,6 @@
         <div class="section-title">Результаты поиска</div>
         <div class="track-list" id="searchTrackList"></div>
       </div>
-
     </div>
   </div>
 
@@ -418,7 +406,60 @@
     const progressFill = document.getElementById('progressFill');
     const lyricsText = document.getElementById('lyricsText');
 
-    // Секретный вход
+    // === Блок постоянного сохранения в память браузера (IndexedDB) ===
+    let db;
+    const dbReq = indexedDB.open("FenixMusicDB", 1);
+    dbReq.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("songs")) {
+        db.createObjectStore("songs", { keyPath: "id" });
+      }
+    };
+    dbReq.onsuccess = (e) => {
+      db = e.target.result;
+      loadStoredSongs();
+    };
+
+    function saveSongToDB(song) {
+      if (!db) return;
+      const tx = db.transaction("songs", "readwrite");
+      tx.objectStore("songs").put(song);
+    }
+
+    function clearDB() {
+      if (!db) return;
+      const tx = db.transaction("songs", "readwrite");
+      tx.objectStore("songs").clear();
+    }
+
+    function removeSongFromDB(id) {
+      if (!db) return;
+      const tx = db.transaction("songs", "readwrite");
+      tx.objectStore("songs").delete(id);
+    }
+
+    function loadStoredSongs() {
+      if (!db) return;
+      const tx = db.transaction("songs", "readonly");
+      const req = tx.objectStore("songs").getAll();
+      req.onsuccess = () => {
+        const stored = req.result;
+        if (stored && stored.length > 0) {
+          songs = stored.map(s => {
+            // Восстанавливаем объект из файла/блоба
+            const blob = new Blob([s.fileData], { type: s.fileType });
+            return {
+              ...s,
+              src: URL.createObjectURL(blob)
+            };
+          });
+          renderAllLists();
+          if (songs.length > 0) loadTrack(0);
+        }
+      };
+    }
+    // =================================================================
+
     function openAdminModal() {
       if (isOwnerLoggedIn) {
         alert("Вы уже вошли как Владелец!");
@@ -446,7 +487,6 @@
       }
     }
 
-    // Массовая загрузка файлов / папок
     async function handleFileUpload(files) {
       if (!files || files.length === 0) return;
       const audioFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || f.name.endsWith('.mp3') || f.name.endsWith('.wav'));
@@ -455,20 +495,28 @@
         let parts = file.name.replace(/\.[^/.]+$/, "").split(" - ");
         let artist = parts.length > 1 ? parts[0].trim() : "Артист";
         let title = parts.length > 1 ? parts.slice(1).join(" - ").trim() : parts[0].trim();
+        let trackId = Date.now() + Math.random();
 
-        songs.push({
-          id: Date.now() + Math.random(),
+        const buffer = await file.arrayBuffer();
+
+        const songObj = {
+          id: trackId,
           title: title,
           artist: artist,
           src: URL.createObjectURL(file),
           cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*200)}`,
-          lyrics: "Текст отсутствует."
-        });
+          lyrics: "Текст отсутствует.",
+          fileData: buffer,
+          fileType: file.type || 'audio/mpeg'
+        };
+
+        songs.push(songObj);
+        saveSongToDB(songObj);
       }
 
       renderAllLists();
       if (currentTrackIndex === -1 && songs.length > 0) loadTrack(0);
-      alert(`Добавлено ${audioFiles.length} треков!`);
+      alert(`Успешно добавлено и сохранено ${audioFiles.length} треков!`);
     }
 
     function clearAllTracks() {
@@ -476,6 +524,7 @@
       if (confirm("Удалить всю библиотеку?")) {
         songs = [];
         favorites.clear();
+        clearDB();
         audio.pause();
         currentTrackIndex = -1;
         playerTitle.innerText = "Загрузите треки";
@@ -486,7 +535,6 @@
 
     function startRandomMix() {
       if (!songs.length) return;
-      // Полный разброс треков вслучайном порядке
       songs.sort(() => Math.random() - 0.5);
       loadTrack(0);
       togglePlay();
@@ -593,6 +641,8 @@
     function deleteTrack(index, e) {
       e.stopPropagation();
       if (!isOwnerLoggedIn) return;
+      const targetSong = songs[index];
+      removeSongFromDB(targetSong.id);
       songs.splice(index, 1);
       renderAllLists();
     }
