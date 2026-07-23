@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Феникс Музыка — Панель Владельца</title>
+  <title>Феникс Музыка — Рабочая версия</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -22,7 +22,6 @@
       height: calc(100vh - 90px);
     }
 
-    /* Боковое меню */
     .sidebar {
       width: 260px;
       background: #161619;
@@ -62,7 +61,7 @@
       font-weight: 700;
     }
 
-    /* Панель администратора / владельца */
+    /* Панель Владельца */
     .owner-section {
       background: #1f1f26;
       border: 1px solid #33333d;
@@ -90,7 +89,6 @@
       font-size: 12px;
       outline: none;
     }
-    .owner-section input:focus { border-color: #ffcc00; }
     .owner-btn {
       background: #ffcc00;
       border: none;
@@ -99,9 +97,7 @@
       font-weight: 700;
       cursor: pointer;
       color: #000;
-      transition: background 0.2s;
     }
-    .owner-btn:hover { background: #e6b800; }
     .status-badge {
       font-size: 10px;
       padding: 2px 6px;
@@ -111,7 +107,6 @@
     }
     .status-badge.active { background: #22c55e; color: #fff; }
 
-    /* Главный контент */
     .main-content {
       flex: 1;
       padding: 32px;
@@ -121,7 +116,6 @@
 
     .section-title { font-size: 24px; font-weight: 700; margin-bottom: 16px; }
 
-    /* Баннер */
     .mix-banner {
       background: linear-gradient(135deg, #241c03 0%, #421c00 100%);
       border: 1px solid #ffcc0044;
@@ -144,7 +138,6 @@
       cursor: pointer;
     }
 
-    /* Поиск */
     .search-input {
       width: 100%;
       padding: 12px 18px;
@@ -156,9 +149,7 @@
       margin-bottom: 20px;
       outline: none;
     }
-    .search-input:focus { border-color: #ffcc00; }
 
-    /* Список треков */
     .track-list { display: flex; flex-direction: column; gap: 8px; }
     .track-row {
       display: flex;
@@ -177,7 +168,6 @@
     .track-row-title { font-weight: 600; font-size: 15px; }
     .track-row-artist { color: #888892; font-size: 13px; }
 
-    /* Плеер */
     .player-bar {
       height: 90px;
       background: #161619;
@@ -217,6 +207,7 @@
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    #fileInput { display: none; }
   </style>
 </head>
 <body>
@@ -230,21 +221,20 @@
         <li class="nav-item" onclick="switchTab('home', this)">🎵 Вся база</li>
       </ul>
 
-      <div class="owner-section" id="ownerSection">
+      <div class="owner-section">
         <div class="owner-title">
           <span>👑 Доступ Владельца</span>
           <span class="status-badge" id="statusBadge">Гость</span>
         </div>
         
         <div id="loginBox" style="display: flex; flex-direction: column; gap: 8px;">
-          <input type="password" id="ownerPassword" placeholder="Введите пароль">
+          <input type="password" id="ownerPassword" placeholder="Пароль (777)">
           <button class="owner-btn" onclick="loginOwner()">Войти</button>
         </div>
 
         <div id="addMusicBox" style="display: none; flex-direction: column; gap: 8px;">
-          <input type="text" id="newTitle" placeholder="Название трека">
-          <input type="text" id="newArtist" placeholder="Исполнитель">
-          <button class="owner-btn" onclick="addTrackAsOwner()">+ Добавить в базу</button>
+          <button class="owner-btn" onclick="document.getElementById('fileInput').click()">📁 Загрузить MP3 с ПК</button>
+          <input type="file" id="fileInput" accept="audio/*" multiple onchange="handleFileUpload(this.files)">
         </div>
       </div>
     </div>
@@ -255,16 +245,16 @@
         <div class="mix-banner">
           <div class="mix-info">
             <h1>🔥 Феникс Микс</h1>
-            <p>Умный поток всех песен из вашей базы данных.</p>
+            <p>Нажми кнопку справа, чтобы начать прослушивание</p>
           </div>
           <button class="mix-play-btn" onclick="startMix()">Запустить Микс ▶</button>
         </div>
-        <h2 class="section-title">Текущая волна</h2>
+        <h2 class="section-title">Список воспроизведения</h2>
         <div class="track-list" id="mixTrackList"></div>
       </div>
 
       <div id="tab-search" class="tab-content">
-        <h2 class="section-title">Поиск по всей базе</h2>
+        <h2 class="section-title">Поиск треков</h2>
         <input type="text" class="search-input" id="searchInput" placeholder="Искать трек или артиста..." oninput="handleSearch()">
         <div class="track-list" id="searchTrackList"></div>
       </div>
@@ -279,9 +269,9 @@
 
   <div class="player-bar">
     <div class="now-playing">
-      <img src="" id="playerCover" class="now-playing-cover">
+      <img src="https://picsum.photos/300/300?random=1" id="playerCover" class="now-playing-cover">
       <div>
-        <div id="playerTitle" style="font-weight:700;">Выберите трек</div>
+        <div id="playerTitle" style="font-weight:700;">Нажмите ▶ для старта</div>
         <div id="playerArtist" style="color:#888; font-size:13px;">—</div>
       </div>
     </div>
@@ -301,24 +291,19 @@
       </div>
     </div>
 
-    <audio id="audio"></audio>
+    <audio id="audio" crossorigin="anonymous"></audio>
   </div>
 
-  <script src="songs.js" onerror="console.log('Загружена дефолтная база')"></script>
-
   <script>
-    // Пароль владельца по умолчанию (можно изменить)
     const OWNER_PASSWORD = "777";
     let isOwnerLoggedIn = false;
 
-    // Базовый список, если songs.js еще не подключен
-    if (typeof songs === 'undefined') {
-      var songs = [
-        { id: 1, title: "I Got Love", artist: "Miyagi & Эндшпиль", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", cover: "https://picsum.photos/300/300?random=1" },
-        { id: 2, title: "Вика любит ПЭПЭ", artist: "Ганвест", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", cover: "https://picsum.photos/300/300?random=2" },
-        { id: 3, title: "Чёрное платье", artist: "DALEKONEANGEL", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", cover: "https://picsum.photos/300/300?random=3" }
-      ];
-    }
+    // Гарантированно рабочие аудиопотоки
+    let songs = [
+      { id: 1, title: "I Got Love", artist: "Miyagi & Эндшпиль", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=1" },
+      { id: 2, title: "Вика любит ПЭПЭ", artist: "Ганвест", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=2" },
+      { id: 3, title: "Чёрное платье", artist: "DALEKONEANGEL", src: "https://stream.zeno.fm/f3wvbbqmdg8uv", cover: "https://picsum.photos/300/300?random=3" }
+    ];
 
     let currentTrackIndex = 0;
     const audio = document.getElementById('audio');
@@ -328,7 +313,6 @@
     const playerArtist = document.getElementById('playerArtist');
     const progressFill = document.getElementById('progressFill');
 
-    // Функция авторизации Владельца
     function loginOwner() {
       const pass = document.getElementById('ownerPassword').value;
       if (pass === OWNER_PASSWORD) {
@@ -338,39 +322,27 @@
         const badge = document.getElementById('statusBadge');
         badge.innerText = 'Владелец';
         badge.classList.add('active');
-        alert('Успешный вход! Теперь вы можете добавлять треки.');
+        alert('Доступ открыт! Теперь ты можешь загружать свои MP3-файлы.');
       } else {
         alert('Неверный пароль!');
       }
     }
 
-    // Функция добавления песни Владельцем
-    function addTrackAsOwner() {
-      if (!isOwnerLoggedIn) {
-        alert('Ошибка: Добавлять музыку может только Владелец!');
-        return;
-      }
-
-      const titleInput = document.getElementById('newTitle');
-      const artistInput = document.getElementById('newArtist');
-      const title = titleInput.value.trim();
-      const artist = artistInput.value.trim();
-
-      if (title && artist) {
-        songs.push({
-          id: Date.now(),
-          title: title,
-          artist: artist,
-          src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-          cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`
-        });
-        titleInput.value = '';
-        artistInput.value = '';
-        renderAllLists();
-        alert(`Трек "${title}" успешно добавлен в базу!`);
-      } else {
-        alert('Заполните все поля!');
-      }
+    function handleFileUpload(files) {
+      Array.from(files).forEach(file => {
+        if (file.type.startsWith('audio/')) {
+          songs.unshift({
+            id: Date.now() + Math.random(),
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            artist: "Мой трек",
+            src: URL.createObjectURL(file),
+            cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*100)}`
+          });
+        }
+      });
+      renderAllLists();
+      loadTrack(0);
+      togglePlay();
     }
 
     function loadTrack(index) {
@@ -386,9 +358,13 @@
 
     function togglePlay() {
       if (!audio.src && songs.length) loadTrack(0);
+      
       if (audio.paused) {
-        audio.play();
-        playBtn.innerText = '❚❚';
+        audio.play().then(() => {
+          playBtn.innerText = '❚❚';
+        }).catch(err => {
+          console.log("Кликните по странице для запуска");
+        });
       } else {
         audio.pause();
         playBtn.innerText = '▶';
@@ -398,8 +374,7 @@
     function startMix() {
       songs.sort(() => Math.random() - 0.5);
       loadTrack(0);
-      audio.play();
-      playBtn.innerText = '❚❚';
+      togglePlay();
     }
 
     function handleSearch() {
@@ -413,15 +388,13 @@
     function nextTrack() {
       if (!songs.length) return;
       loadTrack((currentTrackIndex + 1) % songs.length);
-      audio.play();
-      playBtn.innerText = '❚❚';
+      togglePlay();
     }
 
     function prevTrack() {
       if (!songs.length) return;
       loadTrack((currentTrackIndex - 1 + songs.length) % songs.length);
-      audio.play();
-      playBtn.innerText = '❚❚';
+      togglePlay();
     }
 
     function renderTrackRow(song, index) {
@@ -441,8 +414,7 @@
 
     function selectAndPlay(index) {
       loadTrack(index);
-      audio.play();
-      playBtn.innerText = '❚❚';
+      togglePlay();
     }
 
     function renderAllLists() {
@@ -473,6 +445,7 @@
     }
 
     function formatTime(s) {
+      if (isNaN(s)) return "0:00";
       const m = Math.floor(s / 60);
       const sec = Math.floor(s % 60);
       return `${m}:${sec < 10 ? '0' : ''}${sec}`;
