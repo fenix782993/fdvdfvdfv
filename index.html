@@ -2,15 +2,21 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Феникс Музыка</title>
-  
+
   <meta name="theme-color" content="#ffcc00">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       background-color: #121214;
       color: #fff;
@@ -22,54 +28,33 @@
       user-select: none;
     }
 
+    /* Шапка сайта */
     .top-header {
-      height: 60px;
+      height: 56px;
       background: #18181c;
       border-bottom: 1px solid #24242a;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-    }
-    .header-left { display: flex; align-items: center; gap: 24px; flex: 1; }
-    .logo { font-size: 20px; font-weight: 800; color: #ffcc00; display: flex; align-items: center; gap: 8px; }
-    
-    .search-box {
-      width: 380px;
-      position: relative;
-    }
-    .search-box input {
-      width: 100%;
-      background: #222228;
-      border: 1px solid #33333e;
-      padding: 9px 16px 9px 38px;
-      border-radius: 20px;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-    }
-    .search-box::before {
-      content: "🔍";
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 12px;
-      opacity: 0.5;
+      padding: 0 16px;
+      flex-shrink: 0;
     }
 
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .install-pwa-btn {
-      background: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 18px;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      display: none;
+    .logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffcc00;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .profile-btn {
       width: 36px;
       height: 36px;
@@ -81,191 +66,304 @@
       justify-content: center;
       cursor: pointer;
       font-size: 16px;
-      transition: all 0.2s;
     }
-    .profile-btn:hover { border-color: #ffcc00; background: #2f2f3a; }
-    .profile-btn.active { border-color: #22c55e; background: #1f2d24; }
 
-    .app-body { display: flex; flex: 1; height: calc(100vh - 150px); }
+    .profile-btn.active {
+      border-color: #22c55e;
+      background: #1f2d24;
+    }
 
+    /* Основная рабочая область */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Боковое / Нижнее меню для мобилок */
     .sidebar {
-      width: 240px;
+      width: 220px;
       background: #18181c;
-      padding: 16px 12px;
+      padding: 12px 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       border-right: 1px solid #24242a;
+      flex-shrink: 0;
     }
-    .nav-group-title { font-size: 11px; text-transform: uppercase; color: #666; font-weight: 700; padding: 12px 12px 4px 12px; }
+
+    @media (max-width: 768px) {
+      .app-body {
+        flex-direction: column-reverse;
+      }
+      .sidebar {
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        border-right: none;
+        border-top: 1px solid #24242a;
+        padding: 0;
+      }
+      .nav-group-title {
+        display: none;
+      }
+      .nav-item {
+        flex-direction: column;
+        font-size: 10px !important;
+        gap: 2px !important;
+        padding: 6px !important;
+      }
+    }
+
+    .nav-group-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #666;
+      font-weight: 700;
+      padding: 8px 10px 4px 10px;
+    }
+
     .nav-item {
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
       cursor: pointer;
       color: #a0a0aa;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      transition: all 0.15s;
+      gap: 10px;
     }
-    .nav-item:hover { background: #22222a; color: #fff; }
-    .nav-item.active { background: #ffcc00; color: #000; font-weight: 700; }
 
+    .nav-item.active {
+      background: #ffcc00;
+      color: #000;
+      font-weight: 700;
+    }
+
+    /* Контент */
     .main-content {
       flex: 1;
-      padding: 24px 32px;
+      padding: 16px;
       overflow-y: auto;
       background: linear-gradient(180deg, #16161a 0%, #121214 100%);
     }
 
     .wave-banner {
       background: linear-gradient(135deg, #ffcc00 0%, #ff4500 100%);
-      border-radius: 20px;
-      padding: 32px;
+      border-radius: 16px;
+      padding: 20px;
       color: #000;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 28px;
-      box-shadow: 0 8px 24px rgba(255, 204, 0, 0.15);
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
     }
-    .wave-info h1 { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
-    .wave-info p { font-size: 15px; opacity: 0.85; font-weight: 600; }
+
+    .wave-info h1 {
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .wave-info p {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
     .wave-play-btn {
       background: #000;
       color: #fff;
       border: none;
-      padding: 14px 28px;
-      border-radius: 30px;
+      padding: 12px 20px;
+      border-radius: 24px;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: transform 0.2s;
+      align-self: flex-start;
     }
-    .wave-play-btn:hover { transform: scale(1.04); }
 
-    .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
 
-    .track-list { display: flex; flex-direction: column; gap: 4px; }
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .track-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
-      border-radius: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.15s;
     }
-    .track-row:hover { background: #1e1e24; }
-    .track-row.active { background: #262630; }
-    .track-row.active .track-title { color: #ffcc00; }
-    .track-left { display: flex; align-items: center; gap: 14px; }
-    .track-img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: #2a2a32; }
-    .track-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
-    .track-artist { color: #888; font-size: 12px; }
-    .track-right { display: flex; align-items: center; gap: 16px; }
-    .like-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; transition: color 0.2s; }
-    .like-btn.active { color: #ff3355; }
-    .delete-btn { background: none; border: none; color: #ff4444; cursor: pointer; font-size: 14px; display: none; }
 
+    .track-row.active {
+      background: #262630;
+    }
+
+    .track-row.active .track-title {
+      color: #ffcc00;
+    }
+
+    .track-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .track-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #2a2a32;
+      flex-shrink: 0;
+    }
+
+    .track-title {
+      font-weight: 700;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-artist {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .like-btn {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .like-btn.active {
+      color: #ff3355;
+    }
+
+    /* Нижний Плеер */
     .player-bar {
-      height: 90px;
+      height: 70px;
       background: #18181c;
       border-top: 1px solid #24242a;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 28px;
-      position: relative;
+      padding: 0 16px;
+      flex-shrink: 0;
     }
 
-    .now-playing { display: flex; align-items: center; gap: 14px; width: 280px; }
-    .now-playing-cover { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #222; }
-    .now-playing-info { display: flex; flex-direction: column; }
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 50%;
+    }
 
-    .player-center { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 45%; }
-    .controls-group { display: flex; align-items: center; gap: 18px; }
-    .btn-icon { background: none; border: none; color: #aaa; font-size: 18px; cursor: pointer; transition: color 0.15s; }
-    .btn-icon:hover, .btn-icon.active { color: #fff; }
-    .btn-icon.active-mode { color: #ffcc00; }
-    
+    .now-playing-cover {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #222;
+      flex-shrink: 0;
+    }
+
+    .now-playing-info {
+      overflow: hidden;
+    }
+
+    #playerTitle {
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #playerArtist {
+      color: #888;
+      font-size: 11px;
+    }
+
+    .player-center {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .btn-play-main {
       background: #ffcc00;
       color: #000;
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 16px;
       border: none;
       cursor: pointer;
     }
 
-    .progress-bar-container { display: flex; align-items: center; gap: 10px; width: 100%; font-size: 11px; color: #666; font-weight: 600; }
-    .progress-bg { flex: 1; height: 4px; background: #2a2a32; border-radius: 2px; cursor: pointer; position: relative; }
-    .progress-fill { height: 100%; background: #ffcc00; border-radius: 2px; width: 0%; }
-
-    .player-right { display: flex; align-items: center; gap: 12px; width: 200px; justify-content: flex-end; }
-    .volume-slider { width: 90px; accent-color: #ffcc00; cursor: pointer; }
-
-    .lyrics-drawer {
-      height: 60px;
-      background: #101012;
-      border-top: 1px solid #1c1c22;
-      padding: 0 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
+    .btn-icon {
+      background: none;
+      border: none;
       color: #aaa;
+      font-size: 18px;
+      cursor: pointer;
     }
-    .lyrics-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%; font-weight: 500; }
 
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.8);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
+
     .admin-modal {
       background: #1e1e24;
-      border: 1px solid #33333f;
-      padding: 24px;
-      border-radius: 16px;
-      width: 340px;
+      padding: 20px;
+      border-radius: 12px;
+      width: 280px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
-    .admin-modal h3 { font-size: 16px; color: #ffcc00; text-align: center; }
+
     .admin-modal input {
       background: #121215;
       border: 1px solid #333;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       color: #fff;
-      outline: none;
       text-align: center;
-      font-size: 14px;
     }
+
     .admin-modal button {
       background: #ffcc00;
-      color: #000;
       border: none;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 700;
       cursor: pointer;
     }
@@ -273,132 +371,88 @@
     .admin-panel-inline {
       display: none;
       background: #23232d;
-      border: 1px solid #383848;
-      padding: 14px;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    #fileInputFiles, #fileInputFolder { display: none; }
+    #fileInputFiles { display: none; }
   </style>
 </head>
 <body>
 
   <div class="top-header">
-    <div class="header-left">
-      <div class="logo">🔥 Феникс Музыка</div>
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Трек, исполнитель или альбом" oninput="handleSearch()">
-      </div>
-    </div>
+    <div class="logo">🔥 Феникс</div>
     <div class="header-right">
-      <button class="install-pwa-btn" id="installBtn" onclick="installPWA()">📲 Установить</button>
-      <div class="profile-btn" id="profileBtn" onclick="openAdminModal()" title="Профиль">👤</div>
+      <div class="profile-btn" id="profileBtn" onclick="openAdminModal()">👤</div>
     </div>
   </div>
 
   <div class="app-body">
     <div class="sidebar">
-      <div class="nav-group-title">Музыка</div>
-      <div class="nav-item active" onclick="switchTab('wave', this)">✨ Моя волна</div>
-      <div class="nav-item" onclick="switchTab('home', this)">🎵 Музыка (<span id="totalCount">0</span>)</div>
-      <div class="nav-item" onclick="switchTab('search', this)">🔍 Поиск</div>
-
-      <div class="nav-group-title">Моя коллекция</div>
-      <div class="nav-item" onclick="switchTab('favorites', this)">❤️ Мне нравится (<span id="favCount">0</span>)</div>
+      <div class="nav-item active" onclick="switchTab('wave', this)">✨ <span>Волна</span></div>
+      <div class="nav-item" onclick="switchTab('home', this)">🎵 <span>Музыка (<span id="totalCount">0</span>)</span></div>
+      <div class="nav-item" onclick="switchTab('favorites', this)">❤️ <span>Лайки (<span id="favCount">0</span>)</span></div>
     </div>
 
     <div class="main-content">
       <div class="admin-panel-inline" id="adminPanel">
-        <div style="font-weight:700; color:#ffcc00; font-size:13px; display:flex; justify-content:space-between;">
-          <span>👑 Панель Владельца (Пароль Fenix12)</span>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button style="background:#ffcc00; border:none; padding:8px 12px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="document.getElementById('fileInputFiles').click()">🎵 Выбрать 500+ MP3</button>
-          <button style="background:#e6b800; border:none; padding:8px 12px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="document.getElementById('fileInputFolder').click()">📁 Загрузить ПАПКУ</button>
-          <button style="background:#ff4444; color:#fff; border:none; padding:8px 12px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="clearAllTracks()">🗑️ Очистить всё</button>
-        </div>
+        <div style="font-weight:700; color:#ffcc00; font-size:12px;">👑 Панель Админа</div>
+        <button style="background:#ffcc00; border:none; padding:8px; border-radius:6px; font-weight:700;" onclick="document.getElementById('fileInputFiles').click()">🎵 Загрузить MP3</button>
+        <button style="background:#ff4444; color:#fff; border:none; padding:8px; border-radius:6px; font-weight:700;" onclick="clearAllTracks()">🗑️ Очистить</button>
         <input type="file" id="fileInputFiles" accept="audio/*" multiple onchange="handleFileUpload(this.files)">
-        <input type="file" id="fileInputFolder" accept="audio/*" webkitdirectory directory multiple onchange="handleFileUpload(this.files)">
       </div>
 
       <div id="tab-wave" class="tab-content active">
         <div class="wave-banner">
           <div class="wave-info">
             <h1>Моя волна</h1>
-            <p>Бесконечный микс из твоих треков в случайном порядке</p>
+            <p>Случайный микс из ваших треков</p>
           </div>
-          <button class="wave-play-btn" onclick="startRandomMix()">▶ Включить волну</button>
+          <button class="wave-play-btn" onclick="startRandomMix()">▶ Включить</button>
         </div>
-        <div class="section-title">Список микса (Разброс)</div>
+        <div class="section-title">В разброс</div>
         <div class="track-list" id="waveTrackList"></div>
       </div>
 
       <div id="tab-home" class="tab-content">
-        <div class="section-title">Музыка</div>
+        <div class="section-title">Все треки</div>
         <div class="track-list" id="homeTrackList"></div>
       </div>
 
       <div id="tab-favorites" class="tab-content">
-        <div class="section-title">Мне нравится ❤️</div>
+        <div class="section-title">Любимые ❤️</div>
         <div class="track-list" id="favTrackList"></div>
-      </div>
-
-      <div id="tab-search" class="tab-content">
-        <div class="section-title">Результаты поиска</div>
-        <div class="track-list" id="searchTrackList"></div>
       </div>
     </div>
   </div>
 
   <div class="player-bar">
     <div class="now-playing">
-      <img src="https://picsum.photos/300/300?random=0" id="playerCover" class="now-playing-cover">
+      <img src="https://picsum.photos/100/100" id="playerCover" class="now-playing-cover">
       <div class="now-playing-info">
-        <div id="playerTitle" style="font-weight:700; font-size:14px;">Загрузите треки</div>
-        <div id="playerArtist" style="color:#888; font-size:12px;">—</div>
+        <div id="playerTitle">Выберите трек</div>
+        <div id="playerArtist">—</div>
       </div>
-      <button class="like-btn" id="playerLikeBtn" onclick="toggleCurrentFavorite()" style="margin-left:10px;">❤️</button>
     </div>
 
     <div class="player-center">
-      <div class="controls-group">
-        <button class="btn-icon" id="shuffleBtn" onclick="toggleShuffle()" title="Случайный порядок">🔀</button>
-        <button class="btn-icon" onclick="prevTrack()">⏮</button>
-        <button class="btn-play-main" id="playBtn" onclick="togglePlay()">▶</button>
-        <button class="btn-icon" onclick="nextTrack()">⏭</button>
-        <button class="btn-icon" id="repeatBtn" onclick="toggleRepeat()" title="Повтор">🔁</button>
-      </div>
-      <div class="progress-bar-container">
-        <span id="currentTime">0:00</span>
-        <div class="progress-bg" onclick="setProgress(event)">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <span id="duration">0:00</span>
-      </div>
-    </div>
-
-    <div class="player-right">
-      <button class="btn-icon" id="muteBtn" onclick="toggleMute()">🔊</button>
-      <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1" oninput="changeVolume(this.value)">
+      <button class="btn-icon" onclick="prevTrack()">⏮</button>
+      <button class="btn-play-main" id="playBtn" onclick="togglePlay()">▶</button>
+      <button class="btn-icon" onclick="nextTrack()">⏭</button>
     </div>
 
     <audio id="audio"></audio>
   </div>
 
-  <div class="lyrics-drawer">
-    <div class="lyrics-text" id="lyricsText">📜 Текст песни появится здесь после старта воспроизведения.</div>
-    <button style="background:none; border:none; color:#ffcc00; cursor:pointer; font-weight:700;" onclick="editLyrics()">Редактировать текст</button>
-  </div>
-
   <div class="modal-overlay" id="adminModal">
     <div class="admin-modal">
-      <h3>🔑 Секретный вход Владельца</h3>
-      <input type="password" id="adminPassword" placeholder="Введите пароль">
+      <h3 style="color:#ffcc00; text-align:center;">Вход Владельца</h3>
+      <input type="password" id="adminPassword" placeholder="Пароль">
       <button onclick="checkAdminPassword()">Войти</button>
       <button style="background:#333; color:#ccc;" onclick="closeAdminModal()">Отмена</button>
     </div>
@@ -407,25 +461,16 @@
   <script>
     const SECRET_PASSWORD = "Fenix12";
     let isOwnerLoggedIn = false;
-
     let songs = [];
     let favorites = new Set();
     let currentTrackIndex = -1;
-    let isShuffle = false;
-    let isRepeat = false;
-    let lastVolume = 1;
 
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
-    const playerCover = document.getElementById('playerCover');
-    const playerTitle = document.getElementById('playerTitle');
-    const playerArtist = document.getElementById('playerArtist');
-    const progressFill = document.getElementById('progressFill');
-    const lyricsText = document.getElementById('lyricsText');
 
-    // === IndexedDB Хранилище (Песни сохраняются навсегда) ===
+    // === База Данных IndexedDB ===
     let db;
-    const dbReq = indexedDB.open("FenixMusicDB", 1);
+    const dbReq = indexedDB.open("FenixMobileDB", 1);
     dbReq.onupgradeneeded = (e) => {
       db = e.target.result;
       if (!db.objectStoreNames.contains("songs")) {
@@ -449,12 +494,6 @@
       tx.objectStore("songs").clear();
     }
 
-    function removeSongFromDB(id) {
-      if (!db) return;
-      const tx = db.transaction("songs", "readwrite");
-      tx.objectStore("songs").delete(id);
-    }
-
     function loadStoredSongs() {
       if (!db) return;
       const tx = db.transaction("songs", "readonly");
@@ -464,10 +503,7 @@
         if (stored && stored.length > 0) {
           songs = stored.map(s => {
             const blob = new Blob([s.fileData], { type: s.fileType });
-            return {
-              ...s,
-              src: URL.createObjectURL(blob)
-            };
+            return { ...s, src: URL.createObjectURL(blob) };
           });
           renderAllLists();
           if (songs.length > 0) loadTrack(0);
@@ -475,12 +511,8 @@
       };
     }
 
-    // === Управление Владельца ===
     function openAdminModal() {
-      if (isOwnerLoggedIn) {
-        alert("Вы уже вошли как Владелец!");
-        return;
-      }
+      if (isOwnerLoggedIn) return alert("Вы уже вошли!");
       document.getElementById('adminModal').style.display = 'flex';
     }
 
@@ -490,38 +522,31 @@
     }
 
     function checkAdminPassword() {
-      const pass = document.getElementById('adminPassword').value;
-      if (pass === SECRET_PASSWORD) {
+      if (document.getElementById('adminPassword').value === SECRET_PASSWORD) {
         isOwnerLoggedIn = true;
         document.getElementById('adminPanel').style.display = 'flex';
         document.getElementById('profileBtn').classList.add('active');
         closeAdminModal();
         renderAllLists();
-        alert("Доступ Владельца подтверждён!");
       } else {
-        alert("Неверный секретный пароль!");
+        alert("Неверный пароль!");
       }
     }
 
     async function handleFileUpload(files) {
-      if (!files || files.length === 0) return;
-      const audioFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || f.name.endsWith('.mp3') || f.name.endsWith('.wav'));
-      
-      for (let file of audioFiles) {
+      if (!files.length) return;
+      for (let file of files) {
         let parts = file.name.replace(/\.[^/.]+$/, "").split(" - ");
         let artist = parts.length > 1 ? parts[0].trim() : "Артист";
         let title = parts.length > 1 ? parts.slice(1).join(" - ").trim() : parts[0].trim();
-        let trackId = Date.now() + Math.random();
 
         const buffer = await file.arrayBuffer();
-
         const songObj = {
-          id: trackId,
+          id: Date.now() + Math.random(),
           title: title,
           artist: artist,
           src: URL.createObjectURL(file),
-          cover: `https://picsum.photos/300/300?random=${Math.floor(Math.random()*200)}`,
-          lyrics: "Текст отсутствует.",
+          cover: `https://picsum.photos/200/200?random=${Math.floor(Math.random()*100)}`,
           fileData: buffer,
           fileType: file.type || 'audio/mpeg'
         };
@@ -529,22 +554,18 @@
         songs.push(songObj);
         saveSongToDB(songObj);
       }
-
       renderAllLists();
       if (currentTrackIndex === -1 && songs.length > 0) loadTrack(0);
-      alert(`Успешно сохранено ${audioFiles.length} треков!`);
     }
 
     function clearAllTracks() {
       if (!isOwnerLoggedIn) return;
-      if (confirm("Удалить всю библиотеку?")) {
+      if (confirm("Удалить всё?")) {
         songs = [];
         favorites.clear();
         clearDB();
         audio.pause();
         currentTrackIndex = -1;
-        playerTitle.innerText = "Загрузите треки";
-        playerArtist.innerText = "—";
         renderAllLists();
       }
     }
@@ -561,21 +582,16 @@
       if (index < 0 || index >= songs.length) return;
       currentTrackIndex = index;
       const track = songs[index];
-
-      playerTitle.innerText = track.title;
-      playerArtist.innerText = track.artist;
-      playerCover.src = track.cover;
-      lyricsText.innerText = `📜 ${track.artist} — ${track.title}: ${track.lyrics}`;
+      document.getElementById('playerTitle').innerText = track.title;
+      document.getElementById('playerArtist').innerText = track.artist;
+      document.getElementById('playerCover').src = track.cover;
       audio.src = track.src;
-
-      updateFavoriteUI();
       renderAllLists();
     }
 
     function togglePlay() {
       if (!songs.length) return;
       if (currentTrackIndex === -1) loadTrack(0);
-
       if (audio.paused) {
         audio.play();
         playBtn.innerText = '❚❚';
@@ -587,11 +603,7 @@
 
     function nextTrack() {
       if (!songs.length) return;
-      if (isShuffle) {
-        currentTrackIndex = Math.floor(Math.random() * songs.length);
-      } else {
-        currentTrackIndex = (currentTrackIndex + 1) % songs.length;
-      }
+      currentTrackIndex = (currentTrackIndex + 1) % songs.length;
       loadTrack(currentTrackIndex);
       audio.play();
       playBtn.innerText = '❚❚';
@@ -606,60 +618,9 @@
     }
 
     function toggleFavorite(id, e) {
-      if (e) e.stopPropagation();
+      e.stopPropagation();
       if (favorites.has(id)) favorites.delete(id);
       else favorites.add(id);
-      updateFavoriteUI();
-      renderAllLists();
-    }
-
-    function toggleCurrentFavorite() {
-      if (currentTrackIndex !== -1) {
-        toggleFavorite(songs[currentTrackIndex].id);
-      }
-    }
-
-    function updateFavoriteUI() {
-      if (currentTrackIndex !== -1) {
-        const isFav = favorites.has(songs[currentTrackIndex].id);
-        document.getElementById('playerLikeBtn').classList.toggle('active', isFav);
-      }
-    }
-
-    function toggleShuffle() {
-      isShuffle = !isShuffle;
-      document.getElementById('shuffleBtn').classList.toggle('active-mode', isShuffle);
-    }
-
-    function toggleRepeat() {
-      isRepeat = !isRepeat;
-      document.getElementById('repeatBtn').classList.toggle('active-mode', isRepeat);
-    }
-
-    function changeVolume(val) {
-      audio.volume = val;
-      document.getElementById('muteBtn').innerText = val == 0 ? '🔇' : '🔊';
-    }
-
-    function toggleMute() {
-      if (audio.volume > 0) {
-        lastVolume = audio.volume;
-        audio.volume = 0;
-        document.getElementById('volumeSlider').value = 0;
-        document.getElementById('muteBtn').innerText = '🔇';
-      } else {
-        audio.volume = lastVolume;
-        document.getElementById('volumeSlider').value = lastVolume;
-        document.getElementById('muteBtn').innerText = '🔊';
-      }
-    }
-
-    function deleteTrack(index, e) {
-      e.stopPropagation();
-      if (!isOwnerLoggedIn) return;
-      const targetSong = songs[index];
-      removeSongFromDB(targetSong.id);
-      songs.splice(index, 1);
       renderAllLists();
     }
 
@@ -675,10 +636,7 @@
               <div class="track-artist">${song.artist}</div>
             </div>
           </div>
-          <div class="track-right">
-            <button class="like-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${song.id}, event)">❤️</button>
-            ${isOwnerLoggedIn ? `<button class="delete-btn" style="display:block;" onclick="deleteTrack(${index}, event)">🗑️</button>` : ''}
-          </div>
+          <button class="like-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(${song.id}, event)">❤️</button>
         </div>
       `;
     }
@@ -689,23 +647,16 @@
       playBtn.innerText = '❚❚';
     }
 
-    function handleSearch() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const found = songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
-      document.getElementById('searchTrackList').innerHTML = found.map(s => renderTrackRow(s, songs.indexOf(s))).join('');
-    }
-
     function renderAllLists() {
       document.getElementById('totalCount').innerText = songs.length;
       document.getElementById('favCount').innerText = favorites.size;
-
-      const emptyMsg = '<p style="color:#666; font-size:13px; padding:12px;">Пока нет добавленных треков.</p>';
+      const empty = '<p style="color:#666; font-size:12px; padding:10px;">Пусто</p>';
       
-      document.getElementById('waveTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
-      document.getElementById('homeTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : emptyMsg;
+      document.getElementById('waveTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : empty;
+      document.getElementById('homeTrackList').innerHTML = songs.length ? songs.map((s, i) => renderTrackRow(s, i)).join('') : empty;
       
       const favSongs = songs.filter(s => favorites.has(s.id));
-      document.getElementById('favTrackList').innerHTML = favSongs.length ? favSongs.map(s => renderTrackRow(s, songs.indexOf(s))).join('') : emptyMsg;
+      document.getElementById('favTrackList').innerHTML = favSongs.length ? favSongs.map(s => renderTrackRow(s, songs.indexOf(s))).join('') : empty;
     }
 
     function switchTab(tabName, el) {
@@ -715,71 +666,7 @@
       el.classList.add('active');
     }
 
-    audio.addEventListener('ended', () => {
-      if (isRepeat) {
-        audio.play();
-      } else {
-        nextTrack();
-      }
-    });
-
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration) {
-        progressFill.style.width = (audio.currentTime / audio.duration) * 100 + '%';
-        document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
-        document.getElementById('duration').innerText = formatTime(audio.duration);
-      }
-    });
-
-    function setProgress(e) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
-    }
-
-    function formatTime(s) {
-      if (isNaN(s)) return "0:00";
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-    }
-
-    // === Автоматическая настройка PWA приложения ===
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('installBtn').style.display = 'block';
-    });
-
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-          document.getElementById('installBtn').style.display = 'none';
-        });
-      }
-    }
-
-    // Динамическая регистрация манифеста и сэрвис-воркера
-    const manifest = {
-      name: "Феникс Музыка",
-      short_name: "Феникс",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#121214",
-      theme_color: "#ffcc00",
-      icons: [{ src: "https://picsum.photos/192/192", sizes: "192x192", type: "image/png" }]
-    };
-    const stringManifest = JSON.stringify(manifest);
-    const blobManifest = new Blob([stringManifest], {type: 'application/json'});
-    const manifestURL = URL.createObjectURL(blobManifest);
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = manifestURL;
-    document.head.appendChild(link);
-
-    renderAllLists();
+    audio.addEventListener('ended', nextTrack);
   </script>
 </body>
 </html>
